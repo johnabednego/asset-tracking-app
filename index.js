@@ -1,28 +1,22 @@
 const express = require('express');
-const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
+const swaggerSpec = require('./swagger');
 const dotenv = require('dotenv');
-
 
 dotenv.config();
 
 const app = express();
 
-// Connect to the database
-connectDB();
-
-// Middleware
+// Middleware to parse JSON bodies
 app.use(express.json());
+
 // Swagger UI setup
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Define routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/assets', require('./routes/assetRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
-
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
