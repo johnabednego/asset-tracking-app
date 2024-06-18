@@ -10,6 +10,9 @@ const options = {
     },
     servers: [
       {
+        url: 'http://localhost:5000', // Change this to your deployed URL
+      },
+      {
         url: 'https://asset-tracking-app.vercel.app', // Change this to your deployed URL
       },
     ],
