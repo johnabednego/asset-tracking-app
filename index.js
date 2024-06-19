@@ -1,4 +1,5 @@
 const express = require('express');
+const connectDB = require('./config/db');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
@@ -7,6 +8,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+connectDB();
 
 // Enable CORS
 app.use(cors());
