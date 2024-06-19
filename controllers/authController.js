@@ -25,7 +25,7 @@ exports.register = async (req, res) => {
     await user.save();
 
     // Send verification email
-    const verificationUrl = `http://localhost:5000/api/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `https://asset-tracking-app.vercel.app/api/auth/verify-email?token=${verificationToken}`;
     const subject = 'Email Verification';
     const text = `Hello ${user.name},\n\nPlease verify your email by clicking the link: ${verificationUrl}\n\nBest regards,\nAsset Tracking Team`;
 
