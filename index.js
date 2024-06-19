@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger');
 const dotenv = require('dotenv');
@@ -6,6 +7,15 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:5000'], // Add your frontend URLs here
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+};
+
+// Enable CORS with options
+app.use(cors(corsOptions));
 
 // Middleware to parse JSON bodies
 app.use(express.json());
