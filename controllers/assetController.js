@@ -2,37 +2,38 @@ const Asset = require('../models/Asset');
 const User = require('../models/User');
 const sendEmail = require('../utils/emailUtils');
 
+// Function to notify all admins
+const notifyAdmins = async (subject, text) => {
+  try {
+    const admins = await User.find({ role: 'admin' });
+    const emailPromises = admins.map(admin => sendEmail(admin.email, subject, text));
+    await Promise.all(emailPromises);
+  } catch (error) {
+    console.error('Error notifying admins:', error);
+  }
+};
+
 // Create a new asset
 exports.createAsset = async (req, res) => {
-  const { tagID, serialNumber, name, procurementDate, lifecycleStatus, assignedTo } = req.body;
+  const { tagID, serialNumber, name, procurementDate, status, condition, addedBy } = req.body;
   try {
     let asset = new Asset({
       tagID,
       serialNumber,
       name,
       procurementDate,
-      lifecycleStatus,
-      assignedTo
+      status,
+      condition,
+      addedBy
     });
 
     await asset.save();
 
-    // Send asset assignment email
-    if (assignedTo) {
-      const user = await User.findById(assignedTo);
-      if (user) {
-        const subject = 'New Asset Assigned';
-        const text = `Hello ${user.name},\n\nA new asset (${name}, Serial Number: ${serialNumber}) has been assigned to you.\n\nBest regards,\nAsset Tracking Team`;
-
-        try {
-          await sendEmail(user.email, subject, text);
-        } catch (emailError) {
-          console.error('Error sending email:', emailError);
-          await Asset.findByIdAndDelete(asset.id);
-          return res.status(500).json({ msg: 'Error sending email. Please try again.' });
-        }
-      }
-    }
+    // Notify admins
+    const user = await User.findById(addedBy);
+    const subject = 'New Asset Added';
+    const text = `Hello Admin,\n\nA new asset (${name}, Serial Number: ${serialNumber}) has been added by ${user.name}.\n\nBest regards,\nAsset Tracking Team`;
+    await notifyAdmins(subject, text);
 
     res.json(asset);
   } catch (err) {
@@ -44,7 +45,7 @@ exports.createAsset = async (req, res) => {
 // Get all assets
 exports.getAllAssets = async (req, res) => {
   try {
-    const assets = await Asset.find().populate('assignedTo', 'name email');
+    const assets = await Asset.find().populate('addedBy', 'name email').populate('lastEditedBy', 'name email');
     res.json(assets);
   } catch (err) {
     console.error(err.message);
@@ -55,7 +56,7 @@ exports.getAllAssets = async (req, res) => {
 // Get asset by ID
 exports.getAssetById = async (req, res) => {
   try {
-    const asset = await Asset.findById(req.params.id).populate('assignedTo', 'name email');
+    const asset = await Asset.findById(req.params.id).populate('addedBy', 'name email').populate('lastEditedBy', 'name email');
     if (!asset) {
       return res.status(404).json({ msg: 'Asset not found' });
     }
@@ -71,7 +72,7 @@ exports.getAssetById = async (req, res) => {
 
 // Update asset details
 exports.updateAsset = async (req, res) => {
-  const { tagID, serialNumber, name, procurementDate, lifecycleStatus, assignedTo } = req.body;
+  const { tagID, serialNumber, name, procurementDate, status, condition, lastEditedBy } = req.body;
 
   try {
     let asset = await Asset.findById(req.params.id);
@@ -83,26 +84,17 @@ exports.updateAsset = async (req, res) => {
     asset.serialNumber = serialNumber || asset.serialNumber;
     asset.name = name || asset.name;
     asset.procurementDate = procurementDate || asset.procurementDate;
-    asset.lifecycleStatus = lifecycleStatus || asset.lifecycleStatus;
-    asset.assignedTo = assignedTo || asset.assignedTo;
+    asset.status = status || asset.status;
+    asset.condition = condition || asset.condition;
+    asset.lastEditedBy = lastEditedBy || asset.lastEditedBy;
 
     await asset.save();
 
-    // Send asset assignment email
-    if (assignedTo) {
-      const user = await User.findById(assignedTo);
-      if (user) {
-        const subject = 'Asset Assignment Updated';
-        const text = `Hello ${user.name},\n\nThe asset (${name}, Serial Number: ${serialNumber}) has been assigned to you.\n\nBest regards,\nAsset Tracking Team`;
-
-        try {
-          await sendEmail(user.email, subject, text);
-        } catch (emailError) {
-          console.error('Error sending email:', emailError);
-          return res.status(500).json({ msg: 'Error sending email. Please try again.' });
-        }
-      }
-    }
+    // Notify admins
+    const user = await User.findById(lastEditedBy);
+    const subject = 'Asset Updated';
+    const text = `Hello Admin,\n\nThe asset (${name}, Serial Number: ${serialNumber}) has been updated by ${user.name}.\n\nBest regards,\nAsset Tracking Team`;
+    await notifyAdmins(subject, text);
 
     res.json(asset);
   } catch (err) {
@@ -119,7 +111,15 @@ exports.deleteAsset = async (req, res) => {
       return res.status(404).json({ msg: 'Asset not found' });
     }
 
+    const user = await User.findById(req.user.id); // Assuming req.user contains the current user's ID
+
     await asset.remove();
+
+    // Notify admins
+    const subject = 'Asset Deleted';
+    const text = `Hello Admin,\n\nThe asset (${asset.name}, Serial Number: ${asset.serialNumber}) has been deleted by ${user.name}.\n\nBest regards,\nAsset Tracking Team`;
+    await notifyAdmins(subject, text);
+
     res.json({ msg: 'Asset removed' });
   } catch (err) {
     console.error(err.message);

@@ -19,12 +19,21 @@ const AssetSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
-  lifecycleStatus: {
+  status: {
     type: String,
-    enum: ['active', 'maintenance', 'retired'],
+    enum: ['active', 'maintenance', 'inactive'],
     default: 'active'
   },
-  assignedTo: {
+  condition: {
+    type: String,
+    enum: ['new', 'good', 'fair', 'poor'],
+    default: 'good'
+  },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  lastEditedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },

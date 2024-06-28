@@ -88,12 +88,82 @@ const options = {
               type: 'string',
               format: 'date',
             },
-            lifecycleStatus: {
+            status: {
               type: 'string',
-              enum: ['active', 'maintenance', 'retired'],
+              enum: ['active', 'maintenance', 'inactive'],
             },
-            assignedTo: {
+            condition: {
               type: 'string',
+              enum: ['new', 'good', 'fair', 'poor'],
+            },
+            addedBy: {
+              type: 'string',
+            },
+          },
+        },
+        Employee: {
+          type: 'object',
+          required: ['name', 'role', 'addedBy'],
+          properties: {
+            name: {
+              type: 'string',
+            },
+            role: {
+              type: 'string',
+            },
+            isVerified: {
+              type: 'boolean',
+            },
+            status: {
+              type: 'string',
+              enum: ['active', 'banned'],
+            },
+            addedBy: {
+              type: 'string',
+            },
+            lastEditedBy: {
+              type: 'string',
+            },
+            bannedBy: {
+              type: 'string',
+            },
+          },
+        },
+        AssetOrder: {
+          type: 'object',
+          required: ['assetName', 'quantity', 'orderDate', 'addedBy'],
+          properties: {
+            assetName: {
+              type: 'string',
+            },
+            quantity: {
+              type: 'number',
+            },
+            orderDate: {
+              type: 'string',
+              format: 'date',
+            },
+            addedBy: {
+              type: 'string',
+            },
+          },
+        },
+        BugReport: {
+          type: 'object',
+          required: ['description', 'reportedBy', 'reportDate'],
+          properties: {
+            description: {
+              type: 'string',
+            },
+            reportedBy: {
+              type: 'string',
+            },
+            reportDate: {
+              type: 'string',
+              format: 'date',
+            },
+            fixed: {
+              type: 'boolean',
             },
           },
         },
