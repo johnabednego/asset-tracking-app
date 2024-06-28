@@ -1,7 +1,14 @@
 const express = require('express');
-const { register, login, verifyEmail } = require('../controllers/authController');
+const { register, login, verifyEmailOTP, resendOTP } = require('../controllers/authController');
 const { validateUserRegistration, validateUserLogin } = require('../middlewares/validateFields');
 const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints
+ */
 
 /**
  * @swagger
@@ -46,22 +53,52 @@ router.post('/login', validateUserLogin, login);
 /**
  * @swagger
  * /api/auth/verify-email:
- *   get:
- *     summary: Verify email address
+ *   post:
+ *     summary: Verify email OTP
  *     tags: [Auth]
- *     parameters:
- *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         required: true
- *         description: Verification token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               otp:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Email verified successfully
  *       400:
- *         description: Invalid or expired verification token
+ *         description: Invalid or expired OTP
  */
-router.get('/verify-email', verifyEmail);
+router.post('/verify-email', verifyEmailOTP);
+
+/**
+ * @swagger
+ * /api/auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [email, password]
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       400:
+ *         description: Bad request
+ */
+router.post('/resend-otp', resendOTP);
 
 module.exports = router;
