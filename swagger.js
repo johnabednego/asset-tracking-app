@@ -27,9 +27,12 @@ const options = {
       schemas: {
         User: {
           type: 'object',
-          required: ['name', 'email', 'password', 'role'],
+          required: ['firstName', 'lastName', 'email', 'password', 'country', 'city'],
           properties: {
-            name: {
+            firstName: {
+              type: 'string',
+            },
+            lastName: {
               type: 'string',
             },
             email: {
@@ -38,9 +41,18 @@ const options = {
             password: {
               type: 'string',
             },
+            country: {
+              type: 'string',
+            },
+            city: {
+              type: 'string',
+            },
             role: {
               type: 'string',
-              enum: ['admin', 'user'],
+              enum: ['user', 'admin'],
+            },
+            isVerified: {
+              type: 'boolean',
             },
           },
         },
@@ -59,15 +71,24 @@ const options = {
         UserUpdate: {
           type: 'object',
           properties: {
-            name: {
+            firstName: {
+              type: 'string',
+            },
+            lastName: {
               type: 'string',
             },
             email: {
               type: 'string',
             },
+            country: {
+              type: 'string',
+            },
+            city: {
+              type: 'string',
+            },
             role: {
               type: 'string',
-              enum: ['admin', 'user'],
+              enum: ['user', 'admin'],
             },
           },
         },
@@ -164,6 +185,39 @@ const options = {
             },
             fixed: {
               type: 'boolean',
+            },
+          },
+        },
+        PasswordResetRequest: {
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: {
+              type: 'string',
+            },
+          },
+        },
+        PasswordResetVerify: {
+          type: 'object',
+          required: ['email', 'otp'],
+          properties: {
+            email: {
+              type: 'string',
+            },
+            otp: {
+              type: 'string',
+            },
+          },
+        },
+        PasswordResetNew: {
+          type: 'object',
+          required: ['email', 'newPassword'],
+          properties: {
+            email: {
+              type: 'string',
+            },
+            newPassword: {
+              type: 'string',
             },
           },
         },
